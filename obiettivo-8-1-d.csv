@@ -1,0 +1,61 @@
+country_code;country_name;avg_researchers_per_million;cluster
+FIN;Finland;7397,634793;High
+ISL;Iceland;6859,391848;High
+DNK;Denmark;6593,363581;High
+SWE;Sweden;6372,530127;High
+SGP;Singapore;6064,512263;High
+KOR;Korea (the Republic of);5786,435458;High
+NOR;Norway;5709,266634;High
+JPN;Japan;5254,13735;High
+AUT;Austria;4753,429057;High
+LUX;Luxembourg;4733,997173;High
+CAN;Canada;4486,977622;High
+DEU;Germany;4243,071862;High
+BEL;Belgium;4182,246027;High
+NLD;Netherlands (Kingdom of the);4142,549996;High
+NZL;New Zealand;4124,088625;High
+FRA;France;4031,662692;High
+GBR;United Kingdom of Great Britain and Northern Ireland (the);3968,188436;High
+IRL;Ireland;3949,513533;High
+USA;United States;3821,710932;High
+SVN;Slovenia;3683,68439;High
+PRT;Portugal;3522,797125;High
+HRV;Croatia;1684,979046;Medium
+EST;Estonia;3102,3437;Medium
+RUS;Russian Federation (the);3081,962705;Medium
+HKG;Hong Kong;3056,91878;Medium
+CZE;Czechia;2979,95202;Medium
+GRC;Greece;2808,517442;Medium
+LTU;Lithuania;2752,346006;Medium
+ESP;Spain;2686,994392;Medium
+SVK;Slovakia;2535,438373;Medium
+HUN;Hungary;2506,863075;Medium
+POL;Poland;2104,849683;Medium
+ITA;Italy;1876,525562;Medium
+LVA;Latvia;1788,35191;Medium
+BGR;Bulgaria;1702,861213;Medium
+MLT;Malta;1589,196337;Medium
+MAC;Macao;1518,253216;Medium
+CYP;Cyprus;1087,019484;Medium
+TUR;Türkiye;1080,695321;Medium
+CHN;China;1076,058401;Medium
+MEX;Mexico;324,3016586;Low
+ARG;Argentina;1043,639468;Low
+IRN;Iran (Islamic Republic of);1031,879215;Low
+ROU;Romania;927,8418161;Low
+MDA;Moldova (the Republic of);803,766297;Low
+MKD;North Macedonia;631,1658935;Low
+EGY;Egypt;619,4207788;Low
+KAZ;Kazakhstan;587,2526819;Low
+BRA;Brazil;580,6989033;Low
+UZB;Uzbekistan;546,1665061;Low
+CHL;Chile;432,5082387;Low
+ZAF;South Africa;415,9925265;Low
+CRI;Costa Rica;344,1694331;Low
+BIH;Bosnia and Herzegovina;296,7419419;Low
+OMN;Oman;261,772265;Low
+IRQ;Iraq;216,7764508;Low
+VEN;Venezuela (Bolivarian Republic of);203,4449733;Low
+PAN;Panama;106,2588923;Low
+MDG;Madagascar;41,878536;Low
+GTM;Guatemala;23,72253118;Low
