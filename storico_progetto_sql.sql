@@ -6,43 +6,43 @@ CREATE TABLE researchers_per_million (
     value FLOAT
 );
 
--- correggo il numero di stringhe accettate dalla colonna 'geounit' 
+-- Correggo la lunghezza massima delle stringhe accettate dalla colonna 'geounit 
 
 ALTER TABLE researchers_per_million
 	ALTER COLUMN geounit TYPE VARCHAR(50);
 
--- Dopo questa correzzione sono riuscito a importare correttamente i dati tramite funzione \copy
+-- Dopo questa correzione sono riuscito a importare correttamente i dati tramite la funzione \copy
 
 -- Creo la tabella 'global_data_sustainable_energy' per importare il dataset kaggle
 
 CREATE TABLE global_data_sustainable_energy (
-    entity VARCHAR(255),                     -- Nome del paese
+    entity VARCHAR(255),                     -- Nome del Paese
     year INT,                                -- Anno
     access_to_electricity_pct FLOAT,         -- Accesso all'elettricità (% popolazione)
     access_to_clean_cooking FLOAT,           -- Accesso a combustibili puliti per cucinare
     renewable_capacity_per_capita FLOAT,     -- Capacità rinnovabile per capita
     financial_flows_dev_countries_usd FLOAT, -- Flussi finanziari ai paesi in via di sviluppo (USD)
-    renewable_energy_share_pct FLOAT,        -- Condivisione dell'energia rinnovabile (%)
+    renewable_energy_share_pct FLOAT,        -- Quota di energia rinnovabile (%)
     electricity_fossil_fuels_twh FLOAT,      -- Elettricità da combustibili fossili (TWh)
     electricity_nuclear_twh FLOAT,           -- Elettricità nucleare (TWh)
     electricity_renewables_twh FLOAT,        -- Elettricità rinnovabile (TWh)
-    low_carbon_electricity_pct FLOAT,        -- Elettricità a basse emissioni di carbonio (%)
-    primary_energy_per_capita_kwh FLOAT,     -- Energia primaria per capita (kWh/persona)
+    low_carbon_electricity_pct FLOAT,        -- Elettricità a basse emissioni di CO2 (%)
+    primary_energy_per_capita_kwh FLOAT,     -- Energia primaria pro capite (kWh/persona)
     energy_intensity_mj_per_gdp FLOAT,       -- Intensità energetica (MJ/$2017 PPP GDP)
     co2_emissions_kt FLOAT,                  -- Emissioni di CO2 (kt)
-    renewables_pct_primary_energy FLOAT,     -- Rinnovabili (% energia primaria)
-    gdp_growth_pct FLOAT,                    -- Crescita del PIL (%)
+    renewables_pct_primary_energy FLOAT,     -- Quota di rinnovabili (% energia primaria)
+    gdp_growth_pct FLOAT,                    -- Tasso di crescita del PIL (%)
     gdp_per_capita_usd FLOAT,                -- PIL pro capite (USD)
-    population_density_p_per_km2 FLOAT,      -- Densità popolazione (persone/Km2)
-    land_area_km2 FLOAT,                     -- Area terrestre (Km2)
-    latitude FLOAT,                          -- Latitudine
-    longitude FLOAT                          -- Longitudine
+    population_density_p_per_km2 FLOAT,      -- Densità della popolazione (persone/Km2)
+    land_area_km2 FLOAT,                     -- Superficie terrestre (Km2)
+    latitude FLOAT,                          -- Latitudine (°) 
+    longitude FLOAT                          -- Longitudine (°)
 );
 
 
--- Controllo ce l'importazione sia avvenuta correttamente per rpm
+-- Controllo che l'importazione sia avvenuta correttamente per rpm
 
-SELECT COUNT(*) FROM researchers_per_million;  -- l'ouput è corretto
+SELECT COUNT(*) FROM researchers_per_million;  -- l'output è corretto
 
 -- Controllo alcuni valori per rpm
 
@@ -61,7 +61,7 @@ SELECT * FROM global_data_sustainable_energy LIMIT 10;  -- l'ouput è corretto
 /* 		-------------------------		*/
 
 
--- Seleziono tutti i valori di 'geounit' in rpm che hanno un dati tracciati per più di 9 anni
+-- Seleziono tutti i valori di 'geounit' in rpm che hanno dati tracciati per più di 9 anni
 
 SELECT geoUnit, COUNT(DISTINCT year) AS years_count
 FROM researchers_per_million
@@ -69,7 +69,7 @@ GROUP BY geoUnit										-- l'output restituisce 121 righe
 HAVING COUNT(DISTINCT year) > 9;
 
 
--- Limito i risultati a tutti gli stati in 'geounit' che hanno un acronimo di 3 caratteri
+-- Limito i risultati agli stati in 'geounit' che hanno un acronimo di 3 caratteri
 
 SELECT geoUnit, COUNT(DISTINCT year) AS years_count
 FROM researchers_per_million
@@ -77,7 +77,7 @@ WHERE LENGTH(geoUnit) = 3								-- l'output restituisce 72 righe
 GROUP BY geoUnit
 HAVING COUNT(DISTINCT year) > 9;
 
--- Creao una tabella aggiuntiva con i nomi inglesi dei paesi e il rispettivo codice Alpha-3
+-- Creo una tabella aggiuntiva con i nomi inglesi dei paesi e il rispettivo codice Alpha-3
 
 CREATE TABLE iso_country_codes (
     country_name TEXT,
