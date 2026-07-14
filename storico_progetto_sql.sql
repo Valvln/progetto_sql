@@ -11,7 +11,7 @@ CREATE TABLE researchers_per_million (
 ALTER TABLE researchers_per_million
 	ALTER COLUMN geounit TYPE VARCHAR(50);
 
--- Dopo questa correzione sono riuscito a importare correttamente i dati tramite la funzione \copy
+-- La correzione della lunghezza consente l'importazione corretta dei dati tramite la funzione \copy
 
 -- Creo la tabella 'global_data_sustainable_energy' per importare il dataset kaggle
 
@@ -40,40 +40,39 @@ CREATE TABLE global_data_sustainable_energy (
 );
 
 
--- Controllo che l'importazione sia avvenuta correttamente per rpm
+-- Verifica dell'importazione nella tabella researchers_per_million
 
-SELECT COUNT(*) FROM researchers_per_million;  -- l'output è corretto
+SELECT COUNT(*) FROM researchers_per_million;
 
--- Controllo alcuni valori per rpm
+-- Campionamento dei dati
 
-SELECT * FROM researchers_per_million LIMIT 10;  -- l'output è corretto
+SELECT * FROM researchers_per_million LIMIT 10;
 	
 	
--- Controllo che l'importazione sia avvenuta correttamente per gbse
+-- Verifica dell'importazione nella tabella global_data_sustainable_energy
 
-SELECT COUNT (*) FROM global_data_sustainable_energy;  -- l'output è corretto
+SELECT COUNT (*) FROM global_data_sustainable_energy;
 
 -- Controllo alcuni valori per gbse
 
-SELECT * FROM global_data_sustainable_energy LIMIT 10;  -- l'ouput è corretto
+SELECT * FROM global_data_sustainable_energy LIMIT 10;  -- l'output è corretto
 
 
 /* 		-------------------------		*/
 
 
--- Seleziono tutti i valori di 'geounit' in rpm che hanno dati tracciati per più di 9 anni
+-- Selezione delle unità geografiche con copertura temporale superiore a 9 anni
 
 SELECT geoUnit, COUNT(DISTINCT year) AS years_count
 FROM researchers_per_million
-GROUP BY geoUnit										-- l'output restituisce 121 righe
+GROUP BY geoUnit
 HAVING COUNT(DISTINCT year) > 9;
 
-
--- Limito i risultati agli stati in 'geounit' che hanno un acronimo di 3 caratteri
+-- Filtro su codici ISO Alpha-3 (3 caratteri)
 
 SELECT geoUnit, COUNT(DISTINCT year) AS years_count
 FROM researchers_per_million
-WHERE LENGTH(geoUnit) = 3								-- l'output restituisce 72 righe
+WHERE LENGTH(geoUnit) = 3
 GROUP BY geoUnit
 HAVING COUNT(DISTINCT year) > 9;
 
@@ -84,15 +83,15 @@ CREATE TABLE iso_country_codes (
 	iso_alpha3 VARCHAR(3) PRIMARY KEY
 );
 
--- Controllo che l'importazione sia avvenuta correttamente per icc
+-- Verifica dell'importazione nella tabella iso_country_codes
 
-SELECT * FROM iso_country_codes;			-- l'output restituisce 249 righe, corretto
+SELECT * FROM iso_country_codes;
 
 
 /* 		-------------------------		*/
 
 
--- Uso icc per cercare le corrispondenze tra geounit in rpm e nomi di stati in gdse, e creao una view per memorizzare i risultati
+-- Utilizzo icc per individuare le corrispondenze tra i codici geounit in rpm e i nomi dei paesi in gdse, creando una view per archiviare i risultati
 
 
 CREATE VIEW matching_with_global AS
@@ -119,35 +118,34 @@ SELECT
 FROM 
     country_matches;
 
--- Controllo che la view è stata creata correttamente
+-- Validazione della view matching_with_global
 
-SELECT * FROM matching_with_global;			-- la view restituisce 72 risultati contenenti gli stati che hanno più di 9 anni di raccolta dati e che compaiono in gdse e rpm
+SELECT * FROM matching_with_global;
 
 
--- Uso la view mwg per creare una CTE che fornisce i dati per le prossime analisi
+-- Creazione di una CTE di integrazione per i dati energetici e di ricerca
 
 WITH energy_and_research_data AS (
-    -- Unisco i dati sull'energia rinnovabile con i dati sui ricercatori per milione
     SELECT 
-        gdse.entity,                           -- Stato 
-        icc.iso_alpha3 AS geounit,			    -- Acronimo
-		gdse.year,                             -- Anno di raccolta dei dati
-        gdse.renewable_energy_share_pct,       -- Percentuale di energia rinnovabile percentuale
-        gdse.electricity_renewables_twh,       -- Elettricità rinnovabile generata
-        gdse.renewables_pct_primary_energy,    -- Energia primaria rinnovabile
-        rpm.value AS researchers_per_million   -- Ricercatori per milione
+        gdse.entity,                           -- Nome del paese
+        icc.iso_alpha3 AS geounit,			    -- Codice ISO Alpha-3
+		gdse.year,                             -- Anno
+        gdse.renewable_energy_share_pct,       -- Quota di energia rinnovabile (%)
+        gdse.electricity_renewables_twh,       -- Energia elettrica da fonti rinnovabili (TWh)
+        gdse.renewables_pct_primary_energy,    -- Percentuale di energie rinnovabili sull'energia primaria (%)
+        rpm.value AS researchers_per_million   -- Numero di ricercatori per milione di abitanti
     FROM 
         global_data_sustainable_energy gdse
     JOIN 
         iso_country_codes icc
     ON 
-        gdse.entity = icc.country_name  								-- la CTE funziona correttamente
+        gdse.entity = icc.country_name  
     JOIN 
         researchers_per_million rpm
     ON 
         icc.iso_alpha3 = rpm.geounit AND gdse.year = rpm.year
     WHERE 
-        icc.iso_alpha3 IN (SELECT geounit FROM matching_with_global_copy) -- view aggiornata (_copy)
+        icc.iso_alpha3 IN (SELECT geounit FROM matching_with_global_copy)
 )
 SELECT *
 FROM energy_and_research_data;
@@ -166,10 +164,10 @@ GROUP BY year;
 
 /* 		-------------------------		*/
 
--- ESCLUDERO' DA OGNI QUERY UNA LISTA DI STATI CHE HANNO MOSTRATO AVERE DATI RACCOLTI IN MODO DISCONTINUO
+-- Nota: Le seguenti query escludono stati con dati discontinui per garantire la coerenza analitica
 
-						-- Distribuzione globale dei ricercatori per milione (2018)
--- Obiettivo 1: creare un grafico a barre ordinato per rpm nel 2018. (evidenziando i valori estremi)?
+-- OBIETTIVO 1: Distribuzione globale dei ricercatori per milione (2018)
+-- Grafico ordinato per facilità di confronto tra i paesi
 
 SELECT 
     rpm.geounit,
@@ -184,7 +182,7 @@ ON
 JOIN 
     matching_with_global_copy mwg
 ON 
-    rpm.geounit = mwg.geounit -- Filtro solo stati che sono nella view
+    rpm.geounit = mwg.geounit
 WHERE 
     rpm.year = 2018
     AND rpm.geounit NOT IN ('ECU', 'GEO', 'KWT', 'LKA', 'MYS', 'PRY', 'SRB', 'TGO', 'THA', 'TUN', 'UKR', 'URY')
@@ -192,8 +190,8 @@ WHERE
 ORDER BY 
     researchers_per_million DESC;
 
-						--Distribuzione globale della percentuale di energia rinnovabile (2018)
--- Obiettivo 2: creare un grafico a barre ordinato per renewable_energy_share_pct nel 2018.
+-- OBIETTIVO 2: Distribuzione globale della percentuale di energia rinnovabile (2018)
+-- Grafico ordinato per facilità di confronto tra i paesi
 
 SELECT 
     gdse.entity AS country_name,
@@ -201,9 +199,9 @@ SELECT
 FROM 
     global_data_sustainable_energy gdse
 JOIN 
-    matching_with_global_copy mwg -- view aggiornata
+    matching_with_global_copy mwg
 ON 
-    gdse.entity = mwg.country_name -- Filtro solo stati che sono nella view
+    gdse.entity = mwg.country_name
 WHERE 
     gdse.year = 2018
     AND gdse.entity NOT IN ('Ecuador', 'Georgia', 'Kuwait', 'Sri Lanka', 'Malaysia', 'Paraguay', 'Serbia', 'Togo', 'Thailand', 'Tunisia', 'Ukraine', 'Uruguay')
@@ -211,8 +209,7 @@ ORDER BY
     renewable_energy_share_pct DESC;
 
 
-/* Cerco una spiegazione alla discrepanza tra il numero di righe ottenuto dalla query dell'obiettivo 1 e quello
-ottenuto dalla query dell'obiettivo 2
+/* Indagine sulla discrepanza tra i conteggi dei risultati della query 1 e della query 2
 
 -- Paesi presenti in researchers_per_million ma non in global_data_sustainable_energy
 SELECT 
@@ -249,8 +246,8 @@ WHERE
 
 */
 
-						-- Correlazione statica (tutti gli anni)
--- Obiettivo 3: scatter plot della correlazione tra rpm e renewable_energy_share_pct
+-- OBIETTIVO 3: Correlazione tra ricercatori per milione e quota di energia rinnovabile (dataset completo)
+-- Scatter plot per l'analisi della relazione tra le due variabili
 
 SELECT
     rpm.geounit AS country_code,
@@ -275,7 +272,7 @@ ORDER BY
     country_code, year;
 
 
-/* La seguente query restituisce gli stessi risultati precedenti ma solo con le colonne researchers e renewable energy
+/* Versione semplificata della query precedente con selezione limitata alle variabili di interesse
 WITH energy_and_research_data AS (
     SELECT
         rpm.geounit AS country_code,
@@ -303,9 +300,8 @@ WHERE
     AND renewable_energy_share_pct IS NOT NULL;
 */
 
-
-						-- Paesi top e bottom per correlazione
--- Obiettivo 4: calcolare la correlazione tra researchers_per_million e renewable_energy_share_pct per ogni paese e trovare i 5 con le correlazioni più alte (positive) e più basse (negative)		
+-- OBIETTIVO 4: Analisi della correlazione media per paese
+-- Calcolo degli indicatori aggregati per identificare pattern significativi		
 
 WITH energy_and_research_data AS (
     SELECT
@@ -321,7 +317,7 @@ WITH energy_and_research_data AS (
     ON
         rpm.year = gdse.year
     JOIN
-        matching_with_global_copy mwg -- view aggiornata
+        matching_with_global_copy mwg
     ON
         rpm.geounit = mwg.geounit AND gdse.entity = mwg.country_name
     WHERE
@@ -337,11 +333,10 @@ FROM
 GROUP BY
     country_code, country_name
 ORDER BY
-    avg_researchers_per_million DESC; -- si può eventualmente cambiare l'ordinamento
+    avg_researchers_per_million DESC;
 
-
-						-- Trend globale dei ricercatori per milione (2000-2022)
--- Obiettivo 5: creare un grafico a linee che mostri l'evoluzione del numero di ricercatori per milione nel tempo, aggregando i dati a livello globale.						
+-- OBIETTIVO 5: Evoluzione temporale dei ricercatori per milione (2000-2022)
+-- Grafico a linee con aggregazione globale						
 
 WITH filtered_research_data AS (
     SELECT
@@ -354,7 +349,7 @@ WITH filtered_research_data AS (
     ON
         rpm.geounit = mwg.geounit
     WHERE
-        rpm.geounit NOT IN ('ECU', 'GEO', 'KWT', 'LKA', 'MYS', 'PRY', 'SRB', 'TGO', 'THA', 'TUN', 'UKR', 'URY') -- Paesi esclusi
+        rpm.geounit NOT IN ('ECU', 'GEO', 'KWT', 'LKA', 'MYS', 'PRY', 'SRB', 'TGO', 'THA', 'TUN', 'UKR', 'URY')
 )
 SELECT
     year,
@@ -366,8 +361,8 @@ GROUP BY
 ORDER BY
     year;
 
-						-- Trend globale della percentuale di energia rinnovabile (2000-2022)
--- Obiettivo 6: creare un grafico a linee che mostri l'evoluzione della percentuale di energia rinnovabile a livello globale nel tempo.						
+-- OBIETTIVO 6: Evoluzione temporale della quota di energia rinnovabile (2000-2022)
+-- Grafico a linee con aggregazione globale						
 
 WITH filtered_energy_data AS (
     SELECT
@@ -376,11 +371,11 @@ WITH filtered_energy_data AS (
     FROM
         global_data_sustainable_energy gdse
     JOIN
-        matching_with_global_copy mwg -- view aggiornata
+        matching_with_global_copy mwg
     ON
         gdse.entity = mwg.country_name
     WHERE
-        mwg.geounit NOT IN ('ECU', 'GEO', 'KWT', 'LKA', 'MYS', 'PRY', 'SRB', 'TGO', 'THA', 'TUN', 'UKR', 'URY') -- Paesi esclusi
+        mwg.geounit NOT IN ('ECU', 'GEO', 'KWT', 'LKA', 'MYS', 'PRY', 'SRB', 'TGO', 'THA', 'TUN', 'UKR', 'URY')
 )
 SELECT
     year,
@@ -393,10 +388,8 @@ GROUP BY
 ORDER BY
     year;
 
-
-
-						-- Focus su paesi selezionati (caso studio)
--- Obiettivo 7; creare un grafico che confronti il trend di ricercatori per milione e la percentuale di energia rinnovabile per alcuni paesi significativi dal 2000 al 2022
+-- OBIETTIVO 7: Analisi comparativa per paesi selezionati (2000-2020)
+-- Grafico a linee per il confronto dei trend di ricercatori e energia rinnovabile
 
 WITH selected_countries_data AS (
     SELECT
@@ -412,7 +405,7 @@ WITH selected_countries_data AS (
     ON
         rpm.year = gdse.year 
 	JOIN 
-		matching_with_global_copy mwg 		-- UTILIZZO una copia aggiornata di mwg
+		matching_with_global_copy mwg
 	ON 
         rpm.geounit = mwg.geounit AND gdse.entity = mwg.country_name
     WHERE
@@ -434,8 +427,7 @@ GROUP BY
 ORDER BY
     country_code, year;
 
-/* CERCO L'ORIGINE DELL'ERRORE NELLA PRIMA VERSIONE DELLA QUERY DELL'OBIETTIVO 7
-
+/* Indagine sui fattori di variabilità nella query dell'Obiettivo 7
 SELECT DISTINCT year
 FROM researchers_per_million
 WHERE geounit IN ('DEU', 'ITA', 'USA', 'CAN', 'IND', 'JPN', 'NZL', 'ZAF' );
