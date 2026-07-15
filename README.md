@@ -36,3 +36,9 @@ Per il dettaglio del processo di sviluppo (indagini sui dati, correzioni, query 
 6. Evoluzione temporale 2000–2022 della media globale della quota di energia rinnovabile (grafico a linee).
 7. Confronto per paesi selezionati (Germania, Italia, USA, Canada, Giappone, Nuova Zelanda, Sudafrica), 2000–2020 (grafico a linee).
 8. Clustering dei paesi in base alla media di ricercatori per milione (terzili Low/Medium/High) e correlazione per cluster e per anno.
+
+## FONTI 
+
+1. Global Data on Sustainable Energy (2000-2020). - Kaggle
+2. Researchers per million inhabitants (FTE) - UNESCO
+3. Online Browsing Platform (ISO 3166 - Alpha 3)
